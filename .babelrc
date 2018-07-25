@@ -1,0 +1,15 @@
+{
+    "presets": [
+        ["env", {
+          "targets": {
+            "node": true
+          }
+        }]
+      ],
+    "plugins": [
+        "transform-decorators",
+        "transform-class-properties",
+        "transform-object-rest-spread",
+        "transform-runtime"
+    ]
+}
