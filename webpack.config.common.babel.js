@@ -1,11 +1,23 @@
 import path from 'path';
+import nodeExternals from 'webpack-node-externals';
 
-export default  {
-    entry: ['whatwg-fetch', 'babel-polyfill', path.resolve(__dirname, `./src/index.js`)],
+export default {
+    entry: [
+        //'whatwg-fetch',
+        'babel-polyfill',
+        path.resolve(__dirname, `./src/index.js`)
+    ],
     output: {
-        path: path.resolve(__dirname, `./dist`) ,
-        publicPath: '/',
+        path: path.resolve(__dirname, `./dist`),
+        publicPath: '/'
     },
+    target: 'node',
+    externals: [nodeExternals()],
+    //node: {
+    //    fs: 'empty',
+    //    net: 'empty',
+    //    module: 'empty'
+    //},
     module: {
         rules: [
             {
@@ -28,9 +40,8 @@ export default  {
                     name: '[name].[ext]',
                     outputPath: __dirname + 'fonts/'
                 }
-            },
+            }
         ]
     },
-    plugins: [
-    ]
+    plugins: []
 };

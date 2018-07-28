@@ -20,5 +20,10 @@ module.exports = {
     rules: {
         strict: [2, 'never']
     },
-    plugins: ['react']
+    plugins: [
+        'flowtype'
+    ],
+    extends: [
+        "plugin:flowtype/recommended"
+    ],
 };

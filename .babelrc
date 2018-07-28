@@ -2,9 +2,13 @@
     "presets": [
         ["env", {
           "targets": {
-            "node": true
+            "node": "8.11.2",
+            "browsers": [
+              "last 2 versions"
+            ]
           }
-        }]
+        }],
+        ["flow"]
       ],
     "plugins": [
         "transform-decorators",
