@@ -1,6 +1,7 @@
 import { logger, fetchContent } from '../../utils';
 import Timeframe from './timeframe';
-import {URL, URLSearchParams} from 'url'
+import {URL, URLSearchParams} from 'url';
+import Metadata from './Metadata';
 
 const assert = logger.assert;
 
@@ -65,12 +66,6 @@ class Importer {
     };
 
     buildUrl = params => {
-        //const search = Object.keys({...this.url_params, ...params}).reduce(
-        //    (res, currKey) =>{
-        //        res.push(`${currKey}=${this.url_params[currKey]}`)
-        //        return res;
-        //    },[]
-        //).join('&');
 
         const searchParams = new URLSearchParams({
             ...this.url_params,
@@ -86,7 +81,6 @@ class Importer {
         //url.search = search;
         url.search = searchParams.toString();
 
-        logger.debug(url.href);
         return url;
     };
 

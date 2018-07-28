@@ -7,6 +7,7 @@ const testMetadata = async () => {
     try {
         const data = await parser.download();
         const vars = parser.parse(data);
+        parser.saveMetadata(data);
         vars.forEach(item => {
             //if (Array.isArray(item.value)){
             //    logger.debug({[item.name]: item.value.slice(0,5)});
@@ -26,5 +27,5 @@ const testImporter = () => {
 }
 
 testMetadata();
-testImporter();
+//testImporter();
 

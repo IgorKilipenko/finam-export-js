@@ -9,6 +9,7 @@ import {
     FinamObjectNotFoundError,
     FinamTooLongTimeframeError,
 } from './exception';
+import fs from 'fs';
 
 const assert = logger.assert;
 
@@ -134,6 +135,14 @@ class Metadata {
         );
         return data;
     };
+
+    saveMetadata = (meta) => {
+        fs.writeFile('metadata.txt', meta, err => {
+            if (err){
+                logger.error(err);
+            }
+        });
+    }
 }
 
 export default Metadata;

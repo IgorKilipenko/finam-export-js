@@ -12,25 +12,7 @@ class FinamDownloadError extends FinamImportError {
     }
 }
 
-class FinamThrottlingError extends FinamImportError {
-    constructor(message) {
-        super(message);
-    }
-}
-
 class FinamParsingError extends FinamImportError {
-    constructor(message) {
-        super(message);
-    }
-}
-
-class FinamObjectNotFoundError extends FinamImportError {
-    constructor(message) {
-        super(message);
-    }
-}
-
-class FinamTooLongTimeframeError extends FinamImportError {
     constructor(message) {
         super(message);
     }
@@ -41,8 +23,5 @@ class FinamTooLongTimeframeError extends FinamImportError {
 export {
     FinamImportError,
     FinamDownloadError,
-    FinamThrottlingError,
     FinamParsingError,
-    FinamObjectNotFoundError,
-    FinamTooLongTimeframeError,
 }

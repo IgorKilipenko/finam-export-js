@@ -5,15 +5,16 @@ import https from 'https';
 import iconv from 'iconv-lite';
 
 import fetch from 'node-fetch';
+import { StringDecoder } from 'string_decoder';
 
-const fetchContent = (url, converterStream = iconv.decodeStream('win1251')) => {
+const fetchContent = (url) => {
     return new Promise((resolve, reject) => {
-        fetch(url).then(res => res.text()).then(text => resolve(text)).catch(err => reject(err));
+        fetch(url).then(res => res.buffer()).then(buffer => iconv.decode(buffer,'win1251')).then(text => resolve(text)).catch(err => reject(err));
     })
     
 }
 
-const _fetchContent = (url, converterStream = iconv.decodeStream('win1251')) => {
+const fetchContent_ = (url, converterStream = iconv.decodeStream('win1251')) => {
     return new Promise((resolve, reject) => {
         const urlBuilder = new URL(url);
         logger.debug(urlBuilder.href);
