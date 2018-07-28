@@ -131,13 +131,21 @@ class Metadata {
     download = async () => {
         const data = await fetchContent(
             this.finamUrl,
-            iconv.decodeStream('win1251')
+            'win1251'
         );
         return data;
     };
 
+    upload = async () => {
+
+    }
+
     saveMetadata = (meta) => {
-        fs.writeFile('metadata.txt', meta, err => {
+        const dir = './udata';
+        if (!fs.existsSync(dir)){
+            fs.mkdirSync(dir);
+        }
+        fs.writeFile(`${dir}/metadata.txt`, meta, err => {
             if (err){
                 logger.error(err);
             }
