@@ -18,6 +18,7 @@ class FinamParsingError extends FinamImportError {
     }
 }
 
+
 //#endregion
 
 export {

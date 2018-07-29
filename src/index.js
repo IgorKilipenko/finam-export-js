@@ -1,5 +1,5 @@
 import { logger } from './utils';
-import {Importer, Metadata } from './finam/importer/index';
+import {Importer, Metadata, timeframe, markets} from './finam/importer';
 import path from 'path';
 
 const testMetadata = async () => {
@@ -16,12 +16,21 @@ const testMetadata = async () => {
     }
 };
 
-const testImporter = () => {
+const testImporter = async () => {
     const importer = new Importer();
 
-    importer.download();
+    const data = await importer.import({
+        symbol: 'GAZP',
+        from: new Date(2007, 1, 1),
+        to: new Date(),
+        timeframe: timeframe.DAILY,
+        market: markets.SHARES,
+        id : 16842
+    });
+
+    logger.debug(JSON.stringify(data.slice(0, 5)));
 }
 
 testMetadata();
-//testImporter();
+testImporter();
 

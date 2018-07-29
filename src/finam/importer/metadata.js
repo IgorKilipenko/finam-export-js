@@ -1,17 +1,12 @@
-import { logger, fetchContent, fsp } from '../../utils';
-import iconv from 'iconv-lite';
+import { logger, fetchContent, fsp, assert } from '../../utils';
 import { parse as _parse } from 'babylon';
 import {
     FinamImportError,
-    FinamDownloadError,
-    FinamThrottlingError,
     FinamParsingError,
-    FinamObjectNotFoundError,
-    FinamTooLongTimeframeError
-} from './exception';
+} from '../importer';
 import fs from 'fs';
 
-const assert = logger.assert;
+
 
 /**
  * Обеспечивает получение метаданных с сайта финам. [
@@ -28,6 +23,16 @@ const assert = logger.assert;
  */
 class Metadata {
     finamUrl = 'https://www.finam.ru/cache/icharts/icharts.js';
+    finamDefaultVars = {
+        aEmitentIds: 'aEmitentIds',
+        aEmitentNames: 'aEmitentNames',
+        aEmitentCodes: 'aEmitentCodes',
+        aEmitentMarkets: 'aEmitentMarkets',
+        aEmitentDecp: 'aEmitentDecp',
+        aDataFormatStrs: 'aDataFormatStrs',
+        aEmitentChild: 'aEmitentChild',
+        aEmitentUrls: 'aEmitentUrls'
+    };
 
     /**
      * Парсит исходный код js находит все обявленные элементы типа: [массив | объект]
@@ -54,7 +59,13 @@ class Metadata {
             throw new FinamParsingError(err.message);
         }
 
-        assert(ast && typeof ast.program !== undefined && typeof ast.program.body !== undefined, 'Узел body не найден', FinamParsingError)
+        assert(
+            ast &&
+                typeof ast.program !== undefined &&
+                typeof ast.program.body !== undefined,
+            'Узел body не найден',
+            FinamParsingError
+        );
 
         const body = ast.program.body;
 
@@ -64,7 +75,12 @@ class Metadata {
                 node.kind.match('let|const|var')
         );
 
-        assert(typeof variableDeclarations !== undefined && variableDeclarations.length > 0, 'Узел VariableDeclaration не найден', FinamParsingError)
+        assert(
+            typeof variableDeclarations !== undefined &&
+                variableDeclarations.length > 0,
+            'Узел VariableDeclaration не найден',
+            FinamParsingError
+        );
 
         const declarations = variableDeclarations
             .map(varDec => varDec.declarations)
@@ -77,9 +93,13 @@ class Metadata {
                 return res;
             }, []);
 
-        assert(typeof declarations !== null && declarations.length > 0, 'Узел declarations не найден', FinamParsingError)
+        assert(
+            typeof declarations !== null && declarations.length > 0,
+            'Узел declarations не найден',
+            FinamParsingError
+        );
 
-        const vars = {} // Массив распознанных объектов
+        const vars = {}; // Массив распознанных объектов
         declarations.forEach(dec => {
             if (dec.init.type === 'ArrayExpression' && dec.init.elements) {
                 const value = [];
@@ -90,17 +110,19 @@ class Metadata {
                         value.push(item.value);
                     }
                 });
-
             } else if (
                 dec.init.type === 'ObjectExpression' &&
                 dec.init.properties
             ) {
                 const value = {};
                 vars[dec.id.name] = value;
-                
+
                 dec.init.properties.forEach(propItem => {
                     if (propItem.type.match(/Property$/)) {
-                        const key = typeof propItem.key.nam == undefined ? propItem.key.name : propItem.key.value 
+                        const key =
+                            typeof propItem.key.nam == undefined
+                                ? propItem.key.name
+                                : propItem.key.value;
                         value[key] = propItem.value.value;
                     }
                 });
@@ -110,26 +132,32 @@ class Metadata {
         this.validateMeta(vars);
 
         this.meta = vars;
-        return vars;
+        return this.meta;
     };
 
-    validateMeta = (meta) => {
-        const testNames = [
-            'aEmitentIds',
-            'aEmitentNames',
-            'aEmitentCodes',
-            'aEmitentMarkets',
-            'aEmitentDecp',
-            'aDataFormatStrs',
-            'aEmitentChild',
-            'aEmitentUrls'
-        ]
+    validateMeta = meta => {
         const names = Object.keys(meta);
-        assert(names.length > 0, 'Исходный файл митаданных не содержит переменных', FinamParsingError);
-        testNames.forEach(test => {
-            assert(names.findIndex(name => name === test) >= 0, `В исходном файле метаданных нет переменной ${test}`, FinamParsingError)
-        })
-    }
+        assert(
+            names.length > 0,
+            'Исходный файл митаданных не содержит переменных',
+            FinamParsingError
+        );
+        Object.keys(this.finamDefaultVars).forEach(test => {
+            assert(
+                names.findIndex(name => name === test) >= 0,
+                `В исходном файле метаданных нет переменной ${test}`,
+                FinamParsingError
+            );
+        });
+        assert(
+            meta[this.finamDefaultVars.aEmitentIds].length ===
+                meta[this.finamDefaultVars.aEmitentCodes].length &&
+                meta[this.finamDefaultVars.aEmitentCodes].length ===
+                    meta[this.finamDefaultVars.aEmitentNames].length,
+            'Таблица метатданных имеет неверную структуру, не соответствует длина полей.',
+            FinamParsingError
+        );
+    };
 
     /**
      * Скачивает исходный файл метаданныех (.js)
@@ -141,7 +169,6 @@ class Metadata {
         return data;
     };
 
-    upload = async () => {};
 
     saveMetadata = async (meta = this.meta) => {
         assert(meta && typeof meta !== undefined);

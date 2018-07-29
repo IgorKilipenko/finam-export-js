@@ -9,40 +9,42 @@
 //    exitOnError: false
 //});
 
-class ConsoleLogger {
-    constructor(options) {
+const levels = { 
+    error: 0, 
+    warn: 1, 
+    info: 2, 
+    verbose: 3, 
+    debug: 4, 
+    silly: 5 
+  }; 
+
+class Logger {
+    constructor(options = {level: levels.warn}) {
         this.options = options;
+        this.levels = levels;
     }
 
-    levels = { 
-        error: 0, 
-        warn: 1, 
-        info: 2, 
-        verbose: 3, 
-        debug: 4, 
-        silly: 5 
-      };
-
     log = (level, message, trace=false) => {
-        const os = trace ? console.trace : console.log;
-        os(`[${level}]: ${message}`);
-    };
-    info = message => this.log('info', message);
-    warn = message => this.log('warn', message);
-    error = message => this.log('error', message);
-    assert = (condition, message=`ВНИМАНИЕ! Тест не пройден : ${JSON.stringify(condition)}`, CustomError = Error) => {
-        if (!condition){
-            if (this.options.debug){
-                this.log('assert', message, true)
-            }
-            else {
-                throw new CustomError(message);
-            }
+        if (typeof this.levels[level] !== undefined && this.options.level >= this.levels[level]){
+            const cout = trace ? console.trace : console.log;
+            cout(`[${level}]: ${message}`);
         }
     };
+    info = message => {
+        if (this.options.level >= this.levels.warn){
+            this.log('info', message);
+        }
+    };
+    warn = message => {
+        if (this.options.level >= this.levels.warn){
+            this.log('warn', message)
+        }
+    };
+    error = message => this.log('error', message);
     debug = message => {
-        this.options.debug ? this.log('debug', message) : null;
+        this.options.level >= this.levels.debug ? this.log('debug', message) : null;
     };
 }
 
-export const consoleLogger = new ConsoleLogger({ debug: true });
+export const logger = new Logger({ level: levels.debug });
+export {levels}
