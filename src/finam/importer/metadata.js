@@ -1,4 +1,4 @@
-import { logger, fetchContent } from '../../utils';
+import { logger, fetchContent, fsp } from '../../utils';
 import iconv from 'iconv-lite';
 import { parse as _parse } from 'babylon';
 import {
@@ -7,7 +7,7 @@ import {
     FinamThrottlingError,
     FinamParsingError,
     FinamObjectNotFoundError,
-    FinamTooLongTimeframeError,
+    FinamTooLongTimeframeError
 } from './exception';
 import fs from 'fs';
 
@@ -31,13 +31,12 @@ class Metadata {
 
     /**
      * Парсит исходный код js находит все обявленные элементы типа: [массив | объект]
-     * 
+     *
      * @param {string} textCode Исходный код на js
      * @returns {Array<object>} Массив алементов {name, value}
      * @memberof Metadata
      */
     parse = textCode => {
-
         if (
             !textCode ||
             typeof textCode !== 'string' ||
@@ -55,11 +54,7 @@ class Metadata {
             throw new FinamParsingError(err.message);
         }
 
-        
-
-        if (!ast || ast.program === undefined){
-            throw new FinamParsingError('Узел body не найден');
-        }
+        assert(ast && typeof ast.program !== undefined && typeof ast.program.body !== undefined, 'Узел body не найден', FinamParsingError)
 
         const body = ast.program.body;
 
@@ -69,9 +64,7 @@ class Metadata {
                 node.kind.match('let|const|var')
         );
 
-        if (!variableDeclarations || variableDeclarations.length === 0) {
-            throw new FinamParsingError('Узел VariableDeclaration не найден');
-        }
+        assert(typeof variableDeclarations !== undefined && variableDeclarations.length > 0, 'Узел VariableDeclaration не найден', FinamParsingError)
 
         const declarations = variableDeclarations
             .map(varDec => varDec.declarations)
@@ -84,44 +77,59 @@ class Metadata {
                 return res;
             }, []);
 
-        if (!declarations || declarations.length === 0) {
-            throw new FinamParsingError('Узел declarations не найден');
-        }
+        assert(typeof declarations !== null && declarations.length > 0, 'Узел declarations не найден', FinamParsingError)
 
-        const vars = [];    // Массив распознанных объектов
+        const vars = {} // Массив распознанных объектов
         declarations.forEach(dec => {
             if (dec.init.type === 'ArrayExpression' && dec.init.elements) {
                 const value = [];
-                vars.push({
-                    name: dec.id.name,
-                    value
-                });
+                vars[dec.id.name] = value;
+
                 dec.init.elements.forEach(item => {
                     if (item.type.match(/Literal$/)) {
                         value.push(item.value);
                     }
                 });
+
             } else if (
                 dec.init.type === 'ObjectExpression' &&
                 dec.init.properties
             ) {
                 const value = {};
-                vars.push({
-                    name: dec.id.name,
-                    value
-                });
+                vars[dec.id.name] = value;
+                
                 dec.init.properties.forEach(propItem => {
                     if (propItem.type.match(/Property$/)) {
-                        value[propItem.key.name] = propItem.value.value;
+                        const key = typeof propItem.key.nam == undefined ? propItem.key.name : propItem.key.value 
+                        value[key] = propItem.value.value;
                     }
                 });
             }
         });
 
-        assert(vars.length > 0);
+        this.validateMeta(vars);
 
+        this.meta = vars;
         return vars;
     };
+
+    validateMeta = (meta) => {
+        const testNames = [
+            'aEmitentIds',
+            'aEmitentNames',
+            'aEmitentCodes',
+            'aEmitentMarkets',
+            'aEmitentDecp',
+            'aDataFormatStrs',
+            'aEmitentChild',
+            'aEmitentUrls'
+        ]
+        const names = Object.keys(meta);
+        assert(names.length > 0, 'Исходный файл митаданных не содержит переменных', FinamParsingError);
+        testNames.forEach(test => {
+            assert(names.findIndex(name => name === test) >= 0, `В исходном файле метаданных нет переменной ${test}`, FinamParsingError)
+        })
+    }
 
     /**
      * Скачивает исходный файл метаданныех (.js)
@@ -129,28 +137,25 @@ class Metadata {
      * @memberof Metadata
      */
     download = async () => {
-        const data = await fetchContent(
-            this.finamUrl,
-            'win1251'
-        );
+        const data = await fetchContent(this.finamUrl, 'win1251');
         return data;
     };
 
-    upload = async () => {
+    upload = async () => {};
 
-    }
-
-    saveMetadata = (meta) => {
+    saveMetadata = async (meta = this.meta) => {
+        assert(meta && typeof meta !== undefined);
         const dir = './udata';
-        if (!fs.existsSync(dir)){
+        if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir);
         }
-        fs.writeFile(`${dir}/metadata.txt`, meta, err => {
-            if (err){
-                logger.error(err);
-            }
-        });
-    }
+        const str = JSON.stringify(meta);
+        try {
+            await fsp.writeFile(`${dir}/metadata.json`, str);
+        } catch (err) {
+            logger.error(err);
+        }
+    };
 }
 
 export default Metadata;

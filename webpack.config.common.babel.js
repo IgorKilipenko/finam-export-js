@@ -13,11 +13,7 @@ export default {
     },
     target: 'node',
     externals: [nodeExternals()],
-    //node: {
-    //    fs: 'empty',
-    //    net: 'empty',
-    //    module: 'empty'
-    //},
+
     module: {
         rules: [
             {
@@ -25,22 +21,6 @@ export default {
                 loader: 'babel-loader',
                 exclude: [/node_modules/]
             },
-            {
-                test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
-                loader: require.resolve('url-loader'),
-                options: {
-                    limit: 8000,
-                    name: 'images/[name].[hash:8].[ext]'
-                }
-            },
-            {
-                test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
-                loader: require.resolve('file-loader'),
-                options: {
-                    name: '[name].[ext]',
-                    outputPath: __dirname + 'fonts/'
-                }
-            }
         ]
     },
     plugins: []

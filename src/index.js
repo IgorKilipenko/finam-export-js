@@ -7,9 +7,9 @@ const testMetadata = async () => {
     try {
         const data = await parser.download();
         const vars = parser.parse(data);
-        parser.saveMetadata(data);
-        vars.forEach(item => {
-            logger.debug(item.name);
+        parser.saveMetadata();
+        Object.keys(vars).forEach(item => {
+            logger.debug(item);
         });
     } catch (err) {
         logger.error(err);
@@ -23,5 +23,5 @@ const testImporter = () => {
 }
 
 testMetadata();
-testImporter();
+//testImporter();
 
