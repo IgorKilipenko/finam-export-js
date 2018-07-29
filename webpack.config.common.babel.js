@@ -3,13 +3,12 @@ import nodeExternals from 'webpack-node-externals';
 
 export default {
     entry: [
-        //'whatwg-fetch',
         'babel-polyfill',
         path.resolve(__dirname, `./src/index.js`)
     ],
     output: {
         path: path.resolve(__dirname, `./dist`),
-        publicPath: '/'
+        publicPath: 'dist',
     },
     target: 'node',
     externals: [nodeExternals()],

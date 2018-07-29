@@ -1,0 +1,15 @@
+__tests__
+.babelrc
+.editorconfig
+.eslintrc
+.npmignore
+.travis.yml
+.yarn-cache
+.prettierrc
+example
+src
+webpack.config.prod.babel.js
+webpack.config.dev.babel.js
+webpack.config.common.babel.js
+yarn.lock
+udata
