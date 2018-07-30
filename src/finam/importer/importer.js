@@ -1,12 +1,8 @@
 import { logger, fetchContent, assert } from '../../utils';
 //import Timeframe from './timeframe';
-import {
-    timeframe as Timeframe,
-    markets
-} from '../importer';
+import { timeframe as Timeframe, markets } from '../importer';
 import { URL, URLSearchParams } from 'url';
 import Metadata from './Metadata';
-
 
 class Importer {
     constructor(host = 'export.finam.ru') {
@@ -14,9 +10,7 @@ class Importer {
             this.host = host;
         }
     }
-    headers = {
-
-    }
+    headers = {};
     url_params = {
         d: 'd',
         f: 'table',
@@ -32,15 +26,14 @@ class Importer {
     };
 
     import = async options => {
-        options = {
-            market: markets.SHARES,
-            from: new Date(2007, 1, 1),
-            to: new Date(),
-            timeframe: Timeframe.DAILY,
-            ...options
-        };
-
-        const { symbol, timeframe, id, market, from, to } = options;
+        const {
+            symbol,
+            timeframe = Timeframe.DAILY,
+            id,
+            market = markets.SHARES,
+            from = new Date(2007, 1, 1),
+            to = new Date()
+        } = options;
 
         const params = {
             p: timeframe,
@@ -79,24 +72,26 @@ class Importer {
 
         return url;
     };
-    
+
     /**
-     * 
+     *
      * @returns "<DATE>","<TIME>","<OPEN>","<HIGH>","<LOW>","<CLOSE>","<VOL>"
      * @memberof Importer
      */
-    parseCsv = (csv, options = {newLine: '\r\n', delim:';'}) => {
-        
+    parseCsv = (csv, options = { newLine: '\r\n', delim: ';' }) => {
         const lines = csv.trim().split(options.newLine);
-        const headers = lines.shift().split(options.delim).map(header => header.replace(/^<|>$/g, '').toLowerCase());
+        const headers = lines
+            .shift()
+            .split(options.delim)
+            .map(header => header.replace(/^<|>$/g, '').toLowerCase());
 
         return lines.map(line => {
             return line.split(options.delim).reduce((candle, val, i) => {
                 candle[headers[i]] = val;
                 return candle;
-            } , {})
+            }, {});
         });
-    }
+    };
 }
 
 export default Importer;

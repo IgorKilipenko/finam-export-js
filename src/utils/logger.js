@@ -27,6 +27,7 @@ class Logger {
     log = (level, message, trace=false) => {
         if (typeof this.levels[level] !== undefined && this.options.level >= this.levels[level]){
             const cout = trace ? console.trace : console.log;
+            message = (typeof message !== 'string' || message.length < 1000 ? message : `${message.substring(0, 1000)}...`)
             cout(`[${level}]: ${message}`);
         }
     };
