@@ -9,6 +9,8 @@ export default {
     output: {
         path: path.resolve(__dirname, `./dist`),
         publicPath: 'dist',
+        library: 'FinamImporter',
+        libraryTarget: 'umd'
     },
     target: 'node',
     externals: [nodeExternals()],
