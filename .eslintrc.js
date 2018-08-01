@@ -19,7 +19,7 @@ module.exports = {
     },
     rules: {
         strict: [2, 'never'],
-        'prettier/prettier': 'error',
+        'prettier/prettier': 'warn',
     },
     plugins: [
         'flowtype',

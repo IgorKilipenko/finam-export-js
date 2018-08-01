@@ -112,6 +112,7 @@ class Importer {
         //        return candle;
         //    }, {});
         //});
+
         const table = headers.reduce((res, curr) => {
             res[curr] = new Array(lines.length);
             return res;

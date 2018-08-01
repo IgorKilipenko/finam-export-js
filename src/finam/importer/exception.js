@@ -1,5 +1,3 @@
-//#region  Export Errors
-
 class FinamImportError extends Error {
     constructor(message) {
         super(message);
@@ -18,11 +16,4 @@ class FinamParsingError extends FinamImportError {
     }
 }
 
-
-//#endregion
-
-export {
-    FinamImportError,
-    FinamDownloadError,
-    FinamParsingError,
-}
+export { FinamImportError, FinamDownloadError, FinamParsingError };
