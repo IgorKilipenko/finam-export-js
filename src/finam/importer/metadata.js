@@ -1,12 +1,7 @@
 import { logger, fetchContent, fsp, assert } from '../../utils';
 import { parse as _parse } from 'babylon';
-import {
-    FinamImportError,
-    FinamParsingError,
-} from '../importer';
+import { FinamImportError, FinamParsingError } from '../importer';
 import fs from 'fs';
-
-
 
 /**
  * Обеспечивает получение метаданных с сайта финам. [
@@ -168,7 +163,6 @@ class Metadata {
         const data = await fetchContent(this.finamUrl, 'win1251');
         return data;
     };
-
 
     saveMetadata = async (meta = this.meta) => {
         assert(meta && typeof meta !== undefined);
