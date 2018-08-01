@@ -21,17 +21,17 @@ const testImporter = async () => {
 
     const data = await importer.import(
         {
-            symbol: 'GAZP',
+            symbol: '!TISH',
             from: new Date(2007, 1, 1),
             to: new Date(),
             timeframe: timeframe.DAILY,
-            market: markets.SHARES,
-            id: 16842
+            market: 20,
+            id: 16601
         },
         'test'
     );
 
-    logger.debug(JSON.stringify(data.time));
+    logger.debug(JSON.stringify(data));
 };
 
 const testSet = async () => {

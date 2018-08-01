@@ -4,7 +4,7 @@ import { logger, fetchContent, assert } from '../../utils';
 import { timeframe as Timeframe, markets } from '../importer';
 import { URL, URLSearchParams } from 'url';
 import { listeners } from 'cluster';
-import { FinamParsingError } from './exception';
+import { FinamParsingError, FinamDownloadError } from './exception';
 
 /**
  *
@@ -77,7 +77,22 @@ class Importer {
 
         const url = this.buildUrl(params);
 
+        logger.debug(`Скачивание файла. URL: ${url}...`);
+
         const data = await fetchContent(url);
+
+        logger.debug(`Данные получены. Исходные данные - \n${data}`);
+
+        assert(
+            typeof data !== undefined && data.lebgth > 0,
+            `Ошибка скачивания файла. Файл пустой. ${JSON.stringify({
+                URL: url.toString(),
+                data
+            })}`,
+            FinamDownloadError
+        );
+
+        logger.debug(`Получено ${data.lebgth} символов`);
 
         return this.parseCsv(data);
     };
@@ -95,7 +110,8 @@ class Importer {
         assert(searchParams.toString().length > 0);
 
         const url = new URL(`http://${this.host}`);
-        (url.protocol = 'http:'), (url.host = this.host);
+        url.protocol = 'http:';
+        url.host = this.host;
         url.pathname = 'table.csv';
         url.search = searchParams.toString();
 
