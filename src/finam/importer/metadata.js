@@ -1,3 +1,5 @@
+// @flow
+
 import { logger, fetchContent, fsp, assert } from '../../utils';
 import { parse as _parse } from 'babylon';
 import { FinamImportError, FinamParsingError } from '../importer';
@@ -17,6 +19,8 @@ import fs from 'fs';
  * @class Metadata
  */
 class Metadata {
+    constructor() {}
+
     finamUrl = 'https://www.finam.ru/cache/icharts/icharts.js';
     finamDefaultVars = {
         aEmitentIds: 'aEmitentIds',
@@ -28,15 +32,16 @@ class Metadata {
         aEmitentChild: 'aEmitentChild',
         aEmitentUrls: 'aEmitentUrls'
     };
+    meta: Object;
 
     /**
-     * Парсит исходный код js находит все обявленные элементы типа: [массив | объект]
+     * Анализирует исходный код js (AST) извлекает все обявленные элементы типа: [Array | Object]
      *
      * @param {string} textCode Исходный код на js
-     * @returns {Array<object>} Массив алементов {name, value}
+     * @returns {Array<Object>} Массив элементов {name, value}  [aEmitentIds aEmitentNames aEmitentCodes aEmitentMarkets aEmitentDecp aDataFormatStrs aEmitentChild aEmitentUrls]
      * @memberof Metadata
      */
-    parse = textCode => {
+    parse = (textCode: string = ''): Object => {
         if (
             !textCode ||
             typeof textCode !== 'string' ||
@@ -94,7 +99,7 @@ class Metadata {
             FinamParsingError
         );
 
-        const vars = {}; // Массив распознанных объектов
+        const vars: Object = {}; // Массив распознанных объектов
         declarations.forEach(dec => {
             if (dec.init.type === 'ArrayExpression' && dec.init.elements) {
                 const value = [];
@@ -130,7 +135,7 @@ class Metadata {
         return this.meta;
     };
 
-    validateMeta = meta => {
+    validateMeta = (meta: Object): void => {
         const names = Object.keys(meta);
         assert(
             names.length > 0,
@@ -159,12 +164,12 @@ class Metadata {
      *
      * @memberof Metadata
      */
-    download = async () => {
+    download = async (): Promise<string> => {
         const data = await fetchContent(this.finamUrl, 'win1251');
         return data;
     };
 
-    saveMetadata = async (meta = this.meta) => {
+    saveMetadata = async (meta: Object = this.meta): void => {
         assert(meta && typeof meta !== undefined);
         const dir = './udata';
         if (!fs.existsSync(dir)) {

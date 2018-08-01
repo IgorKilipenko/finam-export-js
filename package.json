@@ -1,6 +1,6 @@
 {
   "name": "finam-export-js",
-  "version": "0.1.0-alpha.2",
+  "version": "0.1.0-alpha.3",
   "description": "\"# finam-export-js\"",
   "main": "dist/finam-export.js",
   "dependencies": {
@@ -35,7 +35,7 @@
   "scripts": {
     "build-dev": "webpack --config webpack.config.dev.babel.js",
     "build-prod": "webpack --config webpack.config.prod.babel.js",
-    "test": "nodemon --watch dist dist/bundle.js",
+    "test": "nodemon --watch dist dist/finam-export.js",
     "flow": "flow --show-all-errors"
   },
   "repository": {

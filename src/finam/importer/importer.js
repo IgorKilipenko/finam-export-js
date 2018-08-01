@@ -31,6 +31,11 @@ class Importer {
         at: '1'
     };
 
+    searchParams = {
+        date: /^(\d{4})(\d{2})(\d{2})$/,
+        time: /^(\d{2}):(\d{2}):(\d{2})/
+    };
+
     /**
      *
      * @param options {Object} {
@@ -43,7 +48,7 @@ class Importer {
      * }
      * @memberof Importer
      */
-    import = async (options: Object) => {
+    import = async (options: Object): Object => {
         const {
             symbol,
             timeframe = Timeframe.DAILY,
@@ -93,25 +98,18 @@ class Importer {
 
     /**
      *
-     * @returns "<DATE>","<TIME>","<OPEN>","<HIGH>","<LOW>","<CLOSE>","<VOL>"
+     * @returns {Object} "<DATE>","<TIME>","<OPEN>","<HIGH>","<LOW>","<CLOSE>","<VOL>"
      * @memberof Importer
      */
     parseCsv = (
         csv: string,
         options: object = { newLine: '\r\n', delim: ';' }
-    ) => {
+    ): Object => {
         const lines = csv.trim().split(options.newLine);
         const headers = lines
             .shift()
             .split(options.delim)
             .map(header => header.replace(/^<|>$/g, '').toLowerCase());
-
-        //return lines.map(line => {
-        //    return line.split(options.delim).reduce((candle, val, i) => {
-        //        candle[headers[i]] = val;
-        //        return candle;
-        //    }, {});
-        //});
 
         const table = headers.reduce((res, curr) => {
             res[curr] = new Array(lines.length);
@@ -120,12 +118,27 @@ class Importer {
         logger.debug(Object.keys(table));
         lines.forEach((line, lineNum) => {
             line.split(options.delim).forEach((val, i) => {
-                table[headers[i]][lineNum] = val;
-                //logger.debug(val)
+                const field = headers[i];
+                table[field][lineNum] =
+                    field.search(/^date|time$/) < 0
+                        ? val
+                        : this.parseDateTime(val, field);
             });
         });
 
         return table;
+    };
+
+    parseDateTime = (str: string, type: 'date' | 'time') => {
+        const match =
+            type === 'date'
+                ? str.match(this.searchParams.date)
+                : str.match(this.searchParams.time);
+        if (match) {
+            return type === 'date'
+                ? new Date(...match.slice(1, 3))
+                : new Date(1970, 1, 1, ...match.slice(1, 3)).getTime();
+        }
     };
 }
 
