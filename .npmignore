@@ -6,6 +6,7 @@ __tests__
 .travis.yml
 .yarn-cache
 .prettierrc
+.flowconfig
 example
 src
 webpack.config.prod.babel.js
@@ -13,3 +14,4 @@ webpack.config.dev.babel.js
 webpack.config.common.babel.js
 yarn.lock
 udata
+jsconfig.json

@@ -18,10 +18,13 @@ module.exports = {
         jsx: true
     },
     rules: {
-        strict: [2, 'never']
+        strict: [2, 'never'],
+        'prettier/prettier': 'error',
     },
     plugins: [
-        'flowtype'
+        'flowtype',
+        'babel',
+        'prettier'
     ],
     extends: [
         "plugin:flowtype/recommended"

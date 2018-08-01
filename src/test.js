@@ -28,7 +28,7 @@ const testImporter = async () => {
         id : 16842
     });
 
-    logger.debug(JSON.stringify(data.slice(0, 5)));
+    logger.debug(JSON.stringify(data));
 }
 
 const testSet = async () =>{
@@ -52,5 +52,5 @@ const testSet = async () =>{
 }
 
 //testMetadata();
-//testImporter();
-testSet();
+testImporter();
+//testSet();
