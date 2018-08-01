@@ -3,6 +3,8 @@
 import { logger, fetchContent, assert } from '../../utils';
 import { timeframe as Timeframe, markets } from '../importer';
 import { URL, URLSearchParams } from 'url';
+import { listeners } from 'cluster';
+import { FinamParsingError } from './exception';
 
 /**
  *
@@ -80,6 +82,10 @@ class Importer {
         return this.parseCsv(data);
     };
 
+    validate = (data: string) => {
+        assert();
+    };
+
     buildUrl = (params: object) => {
         const searchParams = new URLSearchParams({
             ...this.url_params,
@@ -106,16 +112,28 @@ class Importer {
         options: object = { newLine: '\r\n', delim: ';' }
     ): Object => {
         const lines = csv.trim().split(options.newLine);
+
+        assert(
+            listeners.length > 0,
+            `Количество строк в исходном документе меньше 1. Исхлдный текст файла: ${csv}`,
+            FinamParsingError
+        );
+
         const headers = lines
             .shift()
             .split(options.delim)
             .map(header => header.replace(/^<|>$/g, '').toLowerCase());
 
+        assert(
+            headers.length > 0,
+            `Неверный формат заголовка. headers: ${JSON.stringify(headers)}`
+        );
+
         const table = headers.reduce((res, curr) => {
             res[curr] = new Array(lines.length);
             return res;
         }, {});
-        logger.debug(Object.keys(table));
+
         lines.forEach((line, lineNum) => {
             line.split(options.delim).forEach((val, i) => {
                 const field = headers[i];
