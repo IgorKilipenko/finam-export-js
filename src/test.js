@@ -21,12 +21,12 @@ const testImporter = async () => {
 
     const data = await importer.import(
         {
-            symbol: '!TISH',
+            symbol: '000',
             from: new Date(2007, 1, 1),
             to: new Date(),
             timeframe: timeframe.DAILY,
-            market: 20,
-            id: 16601
+            market: 158,
+            id: 'jjjj'
         },
         'test'
     );

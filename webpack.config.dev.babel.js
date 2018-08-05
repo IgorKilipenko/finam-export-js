@@ -1,7 +1,6 @@
 import merge from 'webpack-merge';
 import common from './webpack.config.common.babel';
 import webpack from 'webpack';
-import CleanWebpackPlugin from 'clean-webpack-plugin';
 import path from 'path';
 
 const config = merge(common, {
@@ -13,7 +12,7 @@ const config = merge(common, {
         filename: 'finam-export.js'
     },
     watch: true,
-    plugins: [new CleanWebpackPlugin(['dist'])]
+    plugins: []
 });
 
 export default config;

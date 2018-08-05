@@ -3,7 +3,6 @@
 import { logger, fetchContent, assert } from '../../utils';
 import { timeframe as Timeframe, markets } from '../importer';
 import { URL, URLSearchParams } from 'url';
-import { listeners } from 'cluster';
 import { FinamParsingError, FinamDownloadError } from './exception';
 
 /**
@@ -81,10 +80,10 @@ class Importer {
 
         const data = await fetchContent(url);
 
-        logger.debug(`Данные получены. Исходные данные - \n${data}`);
+        logger.debug(`Данные получены. ${options.symbol}`);
 
         assert(
-            typeof data !== undefined && data.lebgth > 0,
+            typeof data !== undefined && data.length > 0,
             `Ошибка скачивания файла. Файл пустой. ${JSON.stringify({
                 URL: url.toString(),
                 data
@@ -92,7 +91,9 @@ class Importer {
             FinamDownloadError
         );
 
-        logger.debug(`Получено ${data.lebgth} символов`);
+        logger.debug(
+            `Получено для: ${options.symbol}, ${data.length} символов`
+        );
 
         return this.parseCsv(data);
     };
@@ -130,7 +131,7 @@ class Importer {
         const lines = csv.trim().split(options.newLine);
 
         assert(
-            listeners.length > 0,
+            lines.length > 0,
             `Количество строк в исходном документе меньше 1. Исхлдный текст файла: ${csv}`,
             FinamParsingError
         );
@@ -141,9 +142,13 @@ class Importer {
             .map(header => header.replace(/^<|>$/g, '').toLowerCase());
 
         assert(
-            headers.length > 0,
-            `Неверный формат заголовка. headers: ${JSON.stringify(headers)}`
+            headers.length > 0 &&
+                headers.findIndex(item => item === 'date') >= 0,
+            `Неверный формат заголовка. headers: ${JSON.stringify(headers)}`,
+            FinamParsingError
         );
+
+        logger.debug(`!HEADER : ${JSON.stringify(headers)}`);
 
         const table = headers.reduce((res, curr) => {
             res[curr] = new Array(lines.length);
